@@ -33,7 +33,7 @@ button {
   cursor: pointer;
 }
 
-#root {
+#app {
   min-height: 100vh;
 }
 

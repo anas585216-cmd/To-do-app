@@ -10,48 +10,46 @@ export function useTodos() {
   }, [todos]);
 
   function addTodo(text) {
-    if (!text) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
-    setTodos([
-      ...todos,
+    // Immutable updates keep React in sync, and max-ID allocation avoids reuse after deletions.
+    setTodos((currentTodos) => [
+      ...currentTodos,
       {
-        id: todos.length + 1,
-        text,
+        id: currentTodos.reduce((maxId, todo) => Math.max(maxId, todo.id), 0) + 1,
+        text: trimmed,
         completed: false,
       },
     ]);
   }
 
   function toggleTodo(id) {
-    const todo = todos.find((item) => item.id === id);
-    todo.completed = !todo.completed;
-    setTodos(todos);
+    setTodos((currentTodos) =>
+      currentTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
   }
 
   function deleteTodo(id) {
-    setTodos(todos.filter((todo) => todo.id !== id));
+    setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== id));
   }
 
   function updateTodo(id, text) {
-    if (!text.trim()) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
     setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, title: text.trim() } : todo
+      (currentTodos) =>
+        currentTodos.map((todo) =>
+          todo.id === id ? { ...todo, text: trimmed } : todo
       )
     );
   }
 
   function clearCompleted() {
-    const next = [...todos];
-
-    for (let i = 0; i < next.length; i++) {
-      if (next[i].completed) {
-        next.splice(i, 1);
-      }
-    }
-
-    setTodos(next);
+    setTodos((currentTodos) => currentTodos.filter((todo) => !todo.completed));
   }
 
   return {
